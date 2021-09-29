@@ -26,6 +26,13 @@ class Number( Expression ):
 	def __str__(self):
 		return str(self.value)
 
+class Identifier( Expression ):
+	def __init__(self, value):
+		self.value = value
+		
+	def __str__(self):
+		return str(self.value)
+
 
 def error( msg ):
 	#print msg
@@ -41,12 +48,16 @@ def match(matchtok):
 	return tok
 	
 def factor( ):
-	"""factor     = number |  '(' expression ')' """
+	"""factor = number |  '(' expression ')' """
 
 	tok = tokens.peek( )
 	if debug: print ("Factor: ", tok)
 	if re.match(Lexer.number, tok):
 		expr = Number(tok)
+		tokens.next( )
+		return expr
+	if re.match(Lexer.identifier, tok):
+		expr = Identifier(tok)
 		tokens.next( )
 		return expr
 	if tok == "(":
@@ -60,7 +71,7 @@ def factor( ):
 
 
 def term( ):
-	""" term    = factor { ('*' | '/') factor } """
+	""" term = factor { ('*' | '/') factor } """
 
 	tok = tokens.peek( )
 	if debug: print ("Term: ", tok)
@@ -74,7 +85,7 @@ def term( ):
 	return left
 
 def addExpr( ):
-	""" addExpr    = term { ('+' | '-') term } """
+	""" addExpr = term { ('+' | '-') term } """
 
 	tok = tokens.peek( )
 	if debug: print ("addExpr: ", tok)
