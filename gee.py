@@ -26,7 +26,14 @@ class Number( Expression ):
 	def __str__(self):
 		return str(self.value)
 
-class Identifier( Expression ):
+class VarRef( Expression ):
+	def __init__(self, value):
+		self.value = value
+		
+	def __str__(self):
+		return str(self.value)
+
+class String( Expression ):
 	def __init__(self, value):
 		self.value = value
 		
@@ -48,7 +55,7 @@ def match(matchtok):
 	return tok
 	
 def factor( ):
-	"""factor = number |  '(' expression ')' """
+	"""factor = number | string | ident |  "(" expression ")" """
 
 	tok = tokens.peek( )
 	if debug: print ("Factor: ", tok)
@@ -56,8 +63,12 @@ def factor( ):
 		expr = Number(tok)
 		tokens.next( )
 		return expr
+	if re.match(Lexer.string, tok):
+		expr = String(tok)
+		tokens.next( )
+		return expr
 	if re.match(Lexer.identifier, tok):
-		expr = Identifier(tok)
+		expr = VarRef(tok)
 		tokens.next( )
 		return expr
 	if tok == "(":
@@ -67,6 +78,44 @@ def factor( ):
 		tok = match(")")
 		return expr
 	error("Invalid operand")
+	return
+
+def relationalExpr( ):
+	"""relationalExpr = addExpr [ relation addExpr ]"""
+
+	tok = tokens.peek( )
+	if debug: print("relationalExpr: ", tok)
+	return
+
+
+def andExpr( ):
+	"""andExpr = relationalExpr { "and" relationalExpr }"""
+
+	tok = tokens.peek( )
+	if debug: print ("andExpr: ", tok)
+	left = relationalExpr( )
+	tok = tokens.peek( )
+	while tok == "and":
+		tokens.next()
+		right = relationalExpr( )
+		left = BinaryExpr(tok, left, right)
+		tok = tokens.peek( )
+	return left
+
+
+def expr( ):
+	"""expression = andExpr { "or" andExpr }"""
+	
+	tok = tokens.peek( )
+	if debug: print ("expression: ", tok)
+	left = andExpr( )
+	tok = tokens.peek( )
+	while tok == "or":
+		tokens.next()
+		right = andExpr( )
+		left = BinaryExpr(tok, left, right)
+		tok = tokens.peek( )
+	return left
 	return
 
 
@@ -107,14 +156,33 @@ def parseStmtList(  ):
 		print(str(ast))
 	return ast
 
-def parse( text ) :
+def stmtList( ):
+	return
+
+def statement( ):
+	return
+
+
+def assign( ):
+	return
+
+def whileStmt( ):
+	return
+
+def ifStmt( ):
+	return
+
+def block( ):
+	return
+
+def parse( text ):
 	global tokens
 	tokens = Lexer( text )
-	expr = addExpr( )
-	print (str(expr))
+	#expr = addExpr( )
+	#print (str(expr))
 	#     Or:
-	# stmtlist = parseStmtList( tokens )
-	# print str(stmtlist)
+	stmtlist = parseStmtList( tokens )
+	print str(stmtlist)
 	return
 
 
