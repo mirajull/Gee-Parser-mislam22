@@ -164,15 +164,31 @@ def statement( ):
 
 
 def assign( ):
+	"""assign = ident "=" expression  eoln"""
 	return
 
 def whileStmt( ):
+	"""whileStatement = "while"  expression  block"""
 	return
 
 def ifStmt( ):
+	"""ifStatement = "if" expression block   [ "else" block ]"""
 	return
 
 def block( ):
+	"""block = ":" eoln indent stmtList undent"""
+
+	tok = tokens.peek( )
+	if debug: print ("block: ", tok)
+	if tok == ":":
+		tok = tokens.next( )
+		if re.match(Lexer.indent, tok):
+			tok = tokens.next( )
+			stmts = stmtList(tok)
+			tok = tokens.next( )
+			if re.match(Lexer.undent, tok):
+				return stmts
+		return
 	return
 
 def parse( text ):
