@@ -147,19 +147,32 @@ def addExpr( ):
 		tok = tokens.peek( )
 	return left
 
-def parseStmtList(  ):
-	""" gee = { Statement } """
+
+#  Statement class and its subclasses
+class Statement( object ):
+	def __str__(self):
+		return ""
+
+class ifStatement( Statement ):
+	def __init__(self, ifBlock, elseBlock, expr):
+		self.ifBlock = ifBlock
+		self.elseBlock = elseBlock
+		self.expr = expr
+		
+	def __str__(self):
+		return "if " + str(self.expr) + "\n" + str(self.ifBlock) + "else" + "\n" + str(self.elseBlock) + "endif" + "\n"
+
+def stmtList(  ):
+	""" stmtList = { Statement } """
 	tok = tokens.peek( )
 	while tok is not None:
 		# need to store each statement in a list
-		ast = parseStmt(tokens)
+		ast = statement(tokens)
 		print(str(ast))
 	return ast
 
-def stmtList( ):
-	return
-
 def statement( ):
+	"""statement = ifStatement |  whileStatement  |  assign"""
 	return
 
 
