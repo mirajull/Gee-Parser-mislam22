@@ -162,6 +162,22 @@ class ifStatement( Statement ):
 	def __str__(self):
 		return "if " + str(self.expr) + "\n" + str(self.ifBlock) + "else" + "\n" + str(self.elseBlock) + "endif" + "\n"
 
+class whileStatement( Statement ):
+	def __init__(self, whileBlock, expr):
+		self.whileBlock = whileBlock
+		self.expr = expr
+		
+	def __str__(self):
+		return "while " + str(self.expr) + "\n" + str(self.whileBlock) + "endWhile" + "\n"
+
+class assignStatement( Statement ):
+	def __init__(self, id, expr):
+		self.id = id
+		self.expr = expr
+		
+	def __str__(self):
+		return "= " +  str(self.id) + " " + str(self.expr) + "\n"
+
 def stmtList(  ):
 	""" stmtList = { Statement } """
 	tok = tokens.peek( )
