@@ -60,23 +60,23 @@ def factor( ):
 	tok = tokens.peek( )
 	if debug: print ("Factor: ", tok)
 	if re.match(Lexer.number, tok):
-		expr = Number(tok)
+		exprsn = Number(tok)
 		tokens.next( )
-		return expr
+		return exprsn
 	if re.match(Lexer.string, tok):
-		expr = String(tok)
+		exprsn = String(tok)
 		tokens.next( )
-		return expr
+		return exprsn
 	if re.match(Lexer.identifier, tok):
-		expr = VarRef(tok)
+		exprsn = VarRef(tok)
 		tokens.next( )
-		return expr
+		return exprsn
 	if tok == "(":
 		tokens.next( )  # or match( tok )
-		expr = addExpr( )
+		exprsn = addExpr( )
 		tokens.peek( )
 		tok = match(")")
-		return expr
+		return exprsn
 	error("Invalid operand")
 	return
 
@@ -153,29 +153,29 @@ class Statement( object ):
 		return ""
 
 class ifStatement( Statement ):
-	def __init__(self, ifBlock, elseBlock, expr):
+	def __init__(self, ifBlock, elseBlock, exprsn):
 		self.ifBlock = ifBlock
 		self.elseBlock = elseBlock
-		self.expr = expr
+		self.exprsn = exprsn
 		
 	def __str__(self):
-		return "if " + str(self.expr) + "\n" + str(self.ifBlock) + "else" + "\n" + str(self.elseBlock) + "endif" + "\n"
+		return "if " + str(self.exprsn) + "\n" + str(self.ifBlock) + "else" + "\n" + str(self.elseBlock) + "endif" + "\n"
 
 class whileStatement( Statement ):
-	def __init__(self, whileBlock, expr):
+	def __init__(self, whileBlock, exprsn):
 		self.whileBlock = whileBlock
-		self.expr = expr
+		self.exprsn = exprsn
 		
 	def __str__(self):
-		return "while " + str(self.expr) + "\n" + str(self.whileBlock) + "endWhile" + "\n"
+		return "while " + str(self.exprsn) + "\n" + str(self.whileBlock) + "endWhile" + "\n"
 
 class assignStatement( Statement ):
-	def __init__(self, id, expr):
+	def __init__(self, id, exprsn):
 		self.id = id
-		self.expr = expr
+		self.exprsn = exprsn
 		
 	def __str__(self):
-		return "= " +  str(self.id) + " " + str(self.expr) + "\n"
+		return "= " +  str(self.id) + " " + str(self.exprsn) + "\n"
 
 def parseStmtList(  ):
 	""" stmtList = { Statement } """
@@ -215,7 +215,7 @@ def parseIfStmt( ):
 	tok = tokens.next()
 	if debug: print ("if statement: ", tok)
 
-	expr = expr()
+	exprsn = expr()
 	ifBlock = parseBlock()
 	elseBlock = ""
 
@@ -223,7 +223,7 @@ def parseIfStmt( ):
 			if debug: print ("else statement: ", tok)
 			elseBlock = parseBlock()
 	
-	stmt = ifStatement(ifBlock, elseBlock, expr)
+	stmt = ifStatement(ifBlock, elseBlock, exprsn)
 	return stmt
 
 def parseWhileStmt( ):
@@ -232,10 +232,10 @@ def parseWhileStmt( ):
 	tok = tokens.next()
 	if debug: print ("while statement: ", tok)
 
-	expr = expr()
+	exprsn = expr()
 	whileBlock = parseBlock()
 	
-	stmt = whileStatement(whileBlock, expr)
+	stmt = whileStatement(whileBlock, exprsn)
 	return stmt
 
 
@@ -249,8 +249,8 @@ def parseAssignStmt( ):
 
 	if tok == "=":
 		tokens.next()
-		expr = expr()
-		stmt = assignStatement(id, expr)
+		exprsn = expr()
+		stmt = assignStatement(id, exprsn)
 		tok = tokens.next()
 		if tok != ";":
 			error("assign statement doesn't end with eol")
