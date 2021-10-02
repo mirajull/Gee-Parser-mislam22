@@ -85,7 +85,15 @@ def relationalExpr( ):
 
 	tok = tokens.peek( )
 	if debug: print("relationalExpr: ", tok)
-	return
+
+	left = addExpr( )
+	tok = tokens.peek( )
+	while re.match(Lexer.relational, tok):
+		tokens.next()
+		right = addExpr( )
+		left = BinaryExpr(tok, left, right)
+		tok = tokens.peek( )
+	return left
 
 
 def andExpr( ):
@@ -116,7 +124,6 @@ def expr( ):
 		left = BinaryExpr(tok, left, right)
 		tok = tokens.peek( )
 	return left
-	return
 
 
 def term( ):
@@ -206,7 +213,6 @@ def parseStmt( ):
 	else:
 		error("Not a valid statement!")
 		return
-
 	return stmt
 
 def parseIfStmt( ):
@@ -219,9 +225,12 @@ def parseIfStmt( ):
 	ifBlock = parseBlock()
 	elseBlock = ""
 
+	tok = tokens.peek()
+	
 	if tok == "else":
-			if debug: print ("else statement: ", tok)
-			elseBlock = parseBlock()
+		tok = tokens.next()
+		if debug: print ("else statement: ", tok)
+		elseBlock = parseBlock()
 	
 	stmt = ifStatement(ifBlock, elseBlock, exprsn)
 	return stmt
@@ -251,9 +260,10 @@ def parseAssignStmt( ):
 		tokens.next()
 		exprsn = expr()
 		stmt = assignStatement(id, exprsn)
-		tok = tokens.next()
+		tok = tokens.peek()
 		if tok != ";":
 			error("assign statement doesn't end with eol")
+		tokens.next()
 		return stmt
 	else:
 		error("assign statement doesn't have equal sign")
@@ -274,8 +284,10 @@ def parseBlock( ):
 			error("Block is missing indent")
 		tok = tokens.next()
 		stmts = parseStmtList()
+		tok = tokens.peek()
 		if tok != "~":
 			error("Block is missing undent")
+		tokens.next()
 		return stmts
 	else:
 		error("Block is missing ':' character")
@@ -287,7 +299,7 @@ def parse( text ):
 	stmtlist = parseStmtList( )
 	#print(stmtlist)
 	for stmt in stmtlist:
-		print(stmt +"\n")
+		print(str(stmt))
 	return
 
 
