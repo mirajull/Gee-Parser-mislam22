@@ -147,7 +147,6 @@ def addExpr( ):
 		tok = tokens.peek( )
 	return left
 
-
 #  Statement class and its subclasses
 class Statement( object ):
 	def __str__(self):
@@ -178,46 +177,109 @@ class assignStatement( Statement ):
 	def __str__(self):
 		return "= " +  str(self.id) + " " + str(self.expr) + "\n"
 
-def stmtList(  ):
+def parseStmtList(  ):
 	""" stmtList = { Statement } """
+
+	# list of statements will be stored here
+	statementList = []
 	tok = tokens.peek( )
+
 	while tok is not None:
 		# need to store each statement in a list
-		ast = statement(tokens)
-		print(str(ast))
-	return ast
+		stmt = parseStmt()
+		statementList.append(stmt)
+		tok = tokens.peek()
+	return statementList
 
-def statement( ):
+def parseStmt( ):
 	"""statement = ifStatement |  whileStatement  |  assign"""
-	return
 
+	tok = tokens.peek( )
+	if debug: print ("statement: ", tok)
 
-def assign( ):
-	"""assign = ident "=" expression  eoln"""
-	return
+	if tok == "if":
+		stmt = parseIfStmt()
+	elif tok == "while":
+		stmt = parseWhileStmt()
+	elif re.match(Lexer.identifier, tok):
+		stmt = parseAssignStmt()
+	else:
+		error("Not a valid statement!")
+		return
 
-def whileStmt( ):
-	"""whileStatement = "while"  expression  block"""
-	return
+	return stmt
 
-def ifStmt( ):
+def parseIfStmt( ):
 	"""ifStatement = "if" expression block   [ "else" block ]"""
+
+	tok = tokens.next()
+	if debug: print ("if statement: ", tok)
+
+	expr = expr()
+	ifBlock = parseBlock()
+	elseBlock = ""
+
+	if tok == "else":
+			if debug: print ("else statement: ", tok)
+			elseBlock = parseBlock()
+	
+	stmt = ifStatement(ifBlock, elseBlock, expr)
+	return stmt
+
+def parseWhileStmt( ):
+	"""whileStatement = "while"  expression  block"""
+	
+	tok = tokens.next()
+	if debug: print ("while statement: ", tok)
+
+	expr = expr()
+	whileBlock = parseBlock()
+	
+	stmt = whileStatement(whileBlock, expr)
+	return stmt
+
+
+def parseAssignStmt( ):
+	"""assign = ident "=" expression  eoln"""
+
+	id = tokens.peek()
+	if debug: print ("assign statement: ", id)
+
+	tok = tokens.next()
+
+	if tok == "=":
+		tokens.next()
+		expr = expr()
+		stmt = assignStatement(id, expr)
+		tok = tokens.next()
+		if tok != ";":
+			error("assign statement doesn't end with eol")
+		return stmt
+	else:
+		error("assign statement doesn't have equal sign")
 	return
 
-def block( ):
+def parseBlock( ):
 	"""block = ":" eoln indent stmtList undent"""
 
 	tok = tokens.peek( )
 	if debug: print ("block: ", tok)
+
 	if tok == ":":
 		tok = tokens.next( )
-		if re.match(Lexer.indent, tok):
-			tok = tokens.next( )
-			stmts = stmtList(tok)
-			tok = tokens.next( )
-			if re.match(Lexer.undent, tok):
-				return stmts
-		return
+		if tok != ";":
+			error("Block is missing eol character")
+		tok = tokens.next()
+		if tok != "@":
+			error("Block is missing indent")
+		tok = tokens.next()
+		stmts = parseStmtList()
+		tok = tokens.next( )
+		if tok != "~":
+			error("Block is missing undent")
+		return stmts
+	else:
+		error("Block is missing ':' character")
 	return
 
 def parse( text ):
