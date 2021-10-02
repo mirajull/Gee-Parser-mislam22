@@ -1,6 +1,6 @@
 import re, sys, string
 
-debug = True
+debug = False
 dict = { }
 tokens = [ ]
 
@@ -154,6 +154,20 @@ def addExpr( ):
 		tok = tokens.peek( )
 	return left
 
+# list of statements
+class StatementList(object):
+	def __init__(self):
+		self.statementList = []
+
+	def appendStatement(self, statement):
+		self.statementList.append(statement)
+
+	def __str__(self):
+		printStr = ''
+		for statement in self.statementList:
+			printStr += str(statement)
+		return printStr
+
 #  Statement class and its subclasses
 class Statement( object ):
 	def __str__(self):
@@ -187,14 +201,13 @@ class assignStatement( Statement ):
 def parseStmtList(  ):
 	""" stmtList = { Statement } """
 
-	# list of statements will be stored here
-	statementList = []
+	statementList = StatementList()
 	tok = tokens.peek( )
 
 	while tok not in [None,"~"]:
 		# need to store each statement in a list
 		stmt = parseStmt()
-		statementList.append(stmt)
+		statementList.appendStatement(stmt)
 		tok = tokens.peek()
 	return statementList
 
@@ -297,9 +310,7 @@ def parse( text ):
 	global tokens
 	tokens = Lexer( text )
 	stmtlist = parseStmtList( )
-	#print(stmtlist)
-	for stmt in stmtlist:
-		print(str(stmt))
+	print(stmtlist)
 	return
 
 
