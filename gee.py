@@ -184,7 +184,7 @@ def parseStmtList(  ):
 	statementList = []
 	tok = tokens.peek( )
 
-	while tok is not None:
+	while tok not in [None,"~"]:
 		# need to store each statement in a list
 		stmt = parseStmt()
 		statementList.append(stmt)
@@ -274,7 +274,6 @@ def parseBlock( ):
 			error("Block is missing indent")
 		tok = tokens.next()
 		stmts = parseStmtList()
-		tok = tokens.next( )
 		if tok != "~":
 			error("Block is missing undent")
 		return stmts
@@ -285,11 +284,10 @@ def parseBlock( ):
 def parse( text ):
 	global tokens
 	tokens = Lexer( text )
-	#expr = addExpr( )
-	#print (str(expr))
-	#     Or:
-	stmtlist = parseStmtList( tokens )
-	print str(stmtlist)
+	stmtlist = parseStmtList( )
+	#print(stmtlist)
+	for stmt in stmtlist:
+		print(stmt +"\n")
 	return
 
 
