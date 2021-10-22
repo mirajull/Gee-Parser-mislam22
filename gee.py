@@ -19,12 +19,39 @@ class BinaryExpr( Expression ):
 	def __str__(self):
 		return str(self.op) + " " + str(self.left) + " " + str(self.right)
 
+	def value(self, state):
+		left = self.left.value(state)
+		right = self.right.value(state)
+		if self.op == '+':
+			return left + right
+		if self.op == '-':
+			return left - right
+		if self.op == '*':
+			return left * right
+		if self.op == '/':
+			return left / right
+		if self.op == '<':
+			return left < right
+		if self.op == '>':
+			return left > right
+		if self.op == '!=':
+			return left != right
+		if self.op == '==':
+			return left == right
+		if self.op == 'and':
+			return left and right
+		if self.op == 'or':
+			return left or right
+
 class Number( Expression ):
 	def __init__(self, value):
 		self.value = value
 		
 	def __str__(self):
 		return str(self.value)
+
+	def value(self, state):
+		return int(self.value)
 
 class VarRef( Expression ):
 	def __init__(self, value):
@@ -182,6 +209,14 @@ class ifStatement( Statement ):
 	def __str__(self):
 		return "if " + str(self.exprsn) + "\n" + str(self.ifBlock) + "else" + "\n" + str(self.elseBlock) + "endif" + "\n"
 
+	def meaning(self, state):
+		if self.exprsn.value(state):
+			self.ifBlock.meaning(state)
+		else:
+			if self.elseBlock != "":
+				self.elseBlock.meaning(state)
+		return state
+
 class whileStatement( Statement ):
 	def __init__(self, whileBlock, exprsn):
 		self.whileBlock = whileBlock
@@ -190,6 +225,11 @@ class whileStatement( Statement ):
 	def __str__(self):
 		return "while " + str(self.exprsn) + "\n" + str(self.whileBlock) + "endWhile" + "\n"
 
+	def meaning(self, state):
+		while self.exprsn.value(state):
+			self.whileBlock.meaning(state)
+		return state
+
 class assignStatement( Statement ):
 	def __init__(self, id, exprsn):
 		self.id = id
@@ -197,6 +237,10 @@ class assignStatement( Statement ):
 		
 	def __str__(self):
 		return "= " +  str(self.id) + " " + str(self.exprsn) + "\n"
+	
+	def meaning(self, state):
+		state[self.id] = self.exprsn.value(state)
+		return state
 
 def parseStmtList(  ):
 	""" stmtList = { Statement } """
