@@ -45,33 +45,33 @@ class BinaryExpr( Expression ):
 
 class Number( Expression ):
 	def __init__(self, value):
-		self.value = value
+		self.val = value
 		
 	def __str__(self):
-		return str(self.value)
+		return str(self.val)
 
 	def value(self, state):
-		return int(self.value)
+		return int(self.val)
 
 class VarRef( Expression ):
 	def __init__(self, value):
-		self.value = value
+		self.val = value
 		
 	def __str__(self):
-		return str(self.value)
+		return str(self.val)
 	
 	def value(self, state):
-		return state[self.value]
+		return state[self.val]
 
 class String( Expression ):
 	def __init__(self, value):
-		self.value = value
+		self.val = value
 		
 	def __str__(self):
-		return str(self.value)
+		return str(self.val)
 
 	def value(self, state):
-		return self.value
+		return self.val
 
 
 def error( msg ):
@@ -202,7 +202,7 @@ class StatementList(object):
 		return printStr
 	
 	def meaning(self, state):
-		for statement in self.StatementList:
+		for statement in self.statementList:
 			statement.meaning(state)
 		return state
 
