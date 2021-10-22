@@ -34,6 +34,10 @@ class BinaryExpr( Expression ):
 			return left < right
 		if self.op == '>':
 			return left > right
+		if self.op == '<=':
+			return left <= right
+		if self.op == '>=':
+			return left >= right
 		if self.op == '!=':
 			return left != right
 		if self.op == '==':
@@ -42,6 +46,18 @@ class BinaryExpr( Expression ):
 			return left and right
 		if self.op == 'or':
 			return left or right
+
+	def tipe(self, tm):
+		left = self.left.tipe(tm)
+		right = self.right.tipe(tm)
+		if left == right:
+			if self.op in ['+', '-', '*', '/'] and left == 'number':
+				return 'number'
+			if self.op in ['<', '>', '!=', '==', '>=', '<=', 'and', 'or']:
+				return 'boolean'
+		else:
+			error("Type Error: Operations between type " + left + " and " + right + " not allowed!")
+			return
 
 class Number( Expression ):
 	def __init__(self, value):
@@ -52,6 +68,9 @@ class Number( Expression ):
 
 	def value(self, state):
 		return int(self.val)
+	
+	def tipe(self, tm):
+		return 'number'
 
 class VarRef( Expression ):
 	def __init__(self, value):
@@ -62,6 +81,13 @@ class VarRef( Expression ):
 	
 	def value(self, state):
 		return state[self.val]
+	
+	def tipe(self, tm):
+		if self.val not in tm:
+			error("Type Error: " + self.val + " is referenced before being defined!")
+		else:
+			return tm[self.val]
+		
 
 class String( Expression ):
 	def __init__(self, value):
@@ -187,6 +213,7 @@ def addExpr( ):
 		tok = tokens.peek( )
 	return left
 
+
 # list of statements
 class StatementList(object):
 	def __init__(self):
@@ -205,6 +232,11 @@ class StatementList(object):
 		for statement in self.statementList:
 			statement.meaning(state)
 		return state
+
+	def tipe(self, tm):
+		for statement in  self.statementList:
+			statement.tipe(tm)
+
 
 #  Statement class and its subclasses
 class Statement( object ):
@@ -228,6 +260,13 @@ class ifStatement( Statement ):
 				self.elseBlock.meaning(state)
 		return state
 
+	def tipe(self, tm):
+		if self.exprsn.tipe(tm) != 'boolean':
+			error("Type Error: If expression is not boolean")
+		self.ifBlock.tipe(tm)
+		if self.elseBlock != "":
+			self.elseBlock.tipe(tm)
+
 class whileStatement( Statement ):
 	def __init__(self, whileBlock, exprsn):
 		self.whileBlock = whileBlock
@@ -241,6 +280,11 @@ class whileStatement( Statement ):
 			self.whileBlock.meaning(state)
 		return state
 
+	def tipe(self, tm):
+		if self.exprsn.tipe(tm) != 'boolean':
+			error("Type Error: While expression is not boolean!")
+		self.whileBlock.tipe(tm)
+
 class assignStatement( Statement ):
 	def __init__(self, id, exprsn):
 		self.id = id
@@ -252,6 +296,15 @@ class assignStatement( Statement ):
 	def meaning(self, state):
 		state[self.id] = self.exprsn.value(state)
 		return state
+
+	def tipe(self, tm):
+		if self.exprsn.tipe(tm) == "":
+			error("Type Error: Undefined Variable")
+		if self.id not in tm:
+			tm[self.id] = self.exprsn.tipe(tm)
+			print(self.id, tm[self.id])
+		elif tm[self.id] != self.exprsn.tipe(tm):
+			error("Type Error: " + tm[self.id] + " = " + self.exprsn.tipe(tm) + "!")
 
 def parseStmtList(  ):
 	""" stmtList = { Statement } """
@@ -367,13 +420,20 @@ def parse( text ):
 	stmtlist = parseStmtList( )
 	print('\n')
 	print(stmtlist)
-	semantic(stmtlist)
+	types(stmtlist)
 
-def semantic( statementList ):
+def types( statementList ):
+	tm = {}
+	tm = statementList.tipe(tm)
+	print('\n\n')
+	semantics(statementList)
+
+def semantics( statementList ):
 	state = {}
 	state = statementList.meaning(state)
 	print('\n' + printState(state) + '\n')
-	return
+
+
 
 # Lexer, a private class that represents lists of tokens from a Gee
 # statement. This class provides the following to its clients:
@@ -452,6 +512,11 @@ def printState(state):
 	result = result[:-2 or None]
 	result = result + "}"
 	return result
+
+def printType(tm):
+	for key, value in tm.items():
+		print(key, value) 
+	print('\n\n')
 
 def chkIndent(line):
 	ct = 0
