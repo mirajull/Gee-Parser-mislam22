@@ -59,6 +59,9 @@ class VarRef( Expression ):
 		
 	def __str__(self):
 		return str(self.value)
+	
+	def value(self, state):
+		return state[self.value]
 
 class String( Expression ):
 	def __init__(self, value):
@@ -66,6 +69,9 @@ class String( Expression ):
 		
 	def __str__(self):
 		return str(self.value)
+
+	def value(self, state):
+		return self.value
 
 
 def error( msg ):
@@ -194,6 +200,11 @@ class StatementList(object):
 		for statement in self.statementList:
 			printStr += str(statement)
 		return printStr
+	
+	def meaning(self, state):
+		for statement in self.StatementList:
+			statement.meaning(state)
+		return state
 
 #  Statement class and its subclasses
 class Statement( object ):
@@ -355,8 +366,13 @@ def parse( text ):
 	tokens = Lexer( text )
 	stmtlist = parseStmtList( )
 	print(stmtlist)
-	return
+	semantic(stmtlist)
 
+def semantic( statementList ):
+	state = {}
+	state = statementList.meaning(state)
+	print('\n\n' + printState(state) + '\n')
+	return
 
 # Lexer, a private class that represents lists of tokens from a Gee
 # statement. This class provides the following to its clients:
@@ -428,6 +444,12 @@ class Lexer :
 		return "<Lexer at " + str(self.position) + " in " + str(self.tokens) + ">"
 
 
+def printState(stateDict):
+	string = "{"
+	for key, value in stateDict.items():
+		string += "<" + str(key) + ", " + str(value) + ">, " 
+
+	return string[:-2] + "}"
 
 def chkIndent(line):
 	ct = 0
