@@ -365,13 +365,14 @@ def parse( text ):
 	global tokens
 	tokens = Lexer( text )
 	stmtlist = parseStmtList( )
+	print('\n')
 	print(stmtlist)
 	semantic(stmtlist)
 
 def semantic( statementList ):
 	state = {}
 	state = statementList.meaning(state)
-	print('\n\n' + printState(state) + '\n')
+	print('\n' + printState(state) + '\n')
 	return
 
 # Lexer, a private class that represents lists of tokens from a Gee
@@ -444,12 +445,13 @@ class Lexer :
 		return "<Lexer at " + str(self.position) + " in " + str(self.tokens) + ">"
 
 
-def printState(stateDict):
-	string = "{"
-	for key, value in stateDict.items():
-		string += "<" + str(key) + ", " + str(value) + ">, " 
-
-	return string[:-2] + "}"
+def printState(state):
+	result = "{"
+	for key, value in state.items():
+		result += "<" + str(key) + ", " + str(value) + ">, " 
+	result = result[:-2 or None]
+	result = result + "}"
+	return result
 
 def chkIndent(line):
 	ct = 0
