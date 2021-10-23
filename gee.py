@@ -132,7 +132,7 @@ def factor( ):
 		return exprsn
 	if tok == "(":
 		tokens.next( )  # or match( tok )
-		exprsn = addExpr( )
+		exprsn = expr( )
 		tokens.peek( )
 		tok = match(")")
 		return exprsn
